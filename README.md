@@ -19,7 +19,7 @@
 ./update_records.sh -y TXT -m 3 -t "DNS Edit API TOKEN" -z "DNS Zone ID" -n _easytier._tcp.et -d example.com -f "peers.txt"
 ```
 
-可以配合[cron]([Linux crontab 命令 | 菜鸟教程](https://www.runoob.com/linux/linux-comm-crontab.html))或计划任务等定时更新
+可以配合[cron](https://www.runoob.com/linux/linux-comm-crontab.html)或计划任务等定时更新
 
 ## 配置
 
@@ -30,8 +30,6 @@
 
 uri = "srv://et.example.com"
 ```
-
-
 
 - EasyTier TXT 记录
 
