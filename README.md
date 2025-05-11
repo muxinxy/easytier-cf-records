@@ -1,5 +1,5 @@
 <div align="center">
-  <h1 align="center">Easytier CF Records</h1>
+  <h1 align="center">EasyTier CF Records</h1>
   <p align="center">
     EasyTier 更新 Cloudflare TXT/SRV 记录
   </p>
