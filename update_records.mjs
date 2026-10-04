@@ -455,16 +455,19 @@ async function syncCloudflare(cf, opts, selected) {
     if (match) {
       existingByKey.delete(srvKey(record.data));
       if (match.data?.priority !== record.data.priority || match.data?.weight !== record.data.weight) {
-        await cf.request("PUT", `/zones/${zone}/dns_records/${match.id}`, record);
+        const updated = await cf.request("PUT", `/zones/${zone}/dns_records/${match.id}`, record);
+        console.log(`[cf] PUT SRV ${record.name} ${record.data.target}:${record.data.port} -> id=${updated?.id}`);
         changes.push({ action: "UPDATE", detail: `SRV ${record.name} ${record.data.target}:${record.data.port} priority ${match.data.priority} -> ${record.data.priority}` });
       }
     } else {
-      await cf.request("POST", `/zones/${zone}/dns_records`, record);
+      const created = await cf.request("POST", `/zones/${zone}/dns_records`, record);
+      console.log(`[cf] POST SRV ${record.name} prio=${record.data.priority} ${record.data.target}:${record.data.port} -> id=${created?.id}`);
       changes.push({ action: "CREATE", detail: `SRV ${record.name} prio=${record.data.priority} ${record.data.target}:${record.data.port}` });
     }
   }
   for (const stale of existingByKey.values()) {
     await cf.request("DELETE", `/zones/${zone}/dns_records/${stale.id}`);
+    console.log(`[cf] DELETE SRV ${stale.name} ${stale.data?.target}:${stale.data?.port} -> id=${stale.id}`);
     changes.push({ action: "DELETE", detail: `SRV ${stale.name} ${stale.data?.target}:${stale.data?.port}` });
   }
 
@@ -494,8 +497,7 @@ async function syncCloudflare(cf, opts, selected) {
   }
 
   // --- TXT 主记录 et + et-1..et-N ---
-  const escapedDomain = opts.domain.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const txtRe = new RegExp(`^${opts.txtPrefix}(?:-(\\d+))?\\.${escapedDomain}$`, "i");
+  const txtRe = txtReGlobal(opts);
   const existingTxt = (await cf.listRecords(zone, { type: "TXT" })).filter((r) => txtRe.test(r.name));
   for (const { record } of desiredTxt) {
     const atName = existingTxt.filter((r) => r.name.toLowerCase() === record.name.toLowerCase());
@@ -526,7 +528,51 @@ async function syncCloudflare(cf, opts, selected) {
     }
   }
 
+  await verifyZoneState(cf, zone, opts, desiredSrv, desiredTxt, desiredA);
   return changes;
+}
+
+// 写后校验：重新拉取 zone 现状，与期望状态逐条比对（API 自身读取是强一致的）
+async function verifyZoneState(cf, zone, opts, desiredSrv, desiredTxt, desiredA) {
+  const problems = [];
+
+  const srvNow = await cf.listRecords(zone, { type: "SRV", name: `${opts.srvName}.${opts.domain}` });
+  console.log(`[verify] zone 当前 SRV @${opts.srvName}.${opts.domain}: ${srvNow.length} 条`);
+  for (const r of srvNow)
+    console.log(`  id=${r.id} prio=${r.data?.priority} weight=${r.data?.weight} port=${r.data?.port} target=${r.data?.target}`);
+  const wantSrv = new Map(desiredSrv.map(({ record }) => [srvKey(record.data), record.data.priority]));
+  const gotSrv = new Map(srvNow.map((r) => [srvKey(r.data), r.data?.priority]));
+  for (const [k, p] of wantSrv)
+    if (!gotSrv.has(k)) problems.push(`缺少期望的 SRV ${k}`);
+    else if (gotSrv.get(k) !== p) problems.push(`SRV ${k} priority=${gotSrv.get(k)}，期望 ${p}`);
+  for (const k of gotSrv.keys()) if (!wantSrv.has(k)) problems.push(`存在多余的 SRV ${k}`);
+
+  const txtNow = (await cf.listRecords(zone, { type: "TXT" })).filter((r) => txtReGlobal(opts).test(r.name));
+  console.log(`[verify] zone 当前 TXT(et*): ${txtNow.map((r) => r.name).join(", ")}`);
+  const wantTxt = new Map(desiredTxt.map(({ record }) => [record.name.toLowerCase(), record.content]));
+  const gotTxt = new Map(txtNow.map((r) => [r.name.toLowerCase(), r.content]));
+  for (const [name, content] of wantTxt)
+    if (gotTxt.get(name) !== content) problems.push(`TXT ${name} 现为 "${gotTxt.get(name)}"，期望 "${content}"`);
+  for (const name of gotTxt.keys()) if (!wantTxt.has(name)) problems.push(`存在多余的 TXT ${name}`);
+
+  const aNow = (await cf.listRecords(zone, { type: "A" })).filter(
+    (r) => r.name.startsWith(`${opts.txtPrefix}_`) && r.name.endsWith(`.${opts.domain}`),
+  );
+  const wantA = new Map(desiredA.map((r) => [r.name, r.content]));
+  const gotA = new Map(aNow.map((r) => [r.name, r.content]));
+  for (const [name, content] of wantA)
+    if (gotA.get(name) !== content) problems.push(`A ${name} 现为 ${gotA.get(name)}，期望 ${content}`);
+  for (const name of gotA.keys()) if (!wantA.has(name)) problems.push(`存在多余的 A ${name}`);
+
+  if (problems.length) {
+    throw new Error(`写后校验失败（API 报告成功但 zone 状态不符）：\n  ${problems.join("\n  ")}`);
+  }
+  console.log("[verify] 写后校验通过，zone 状态与期望一致");
+}
+
+function txtReGlobal(opts) {
+  const escapedDomain = opts.domain.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`^${opts.txtPrefix}(?:-(\\d+))?\\.${escapedDomain}$`, "i");
 }
 
 // ---------- 输出 ----------
