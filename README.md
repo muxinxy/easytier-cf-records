@@ -5,11 +5,13 @@
 
 [![Update EasyTier DNS records](https://github.com/muxinxy/easytier-cf-records/actions/workflows/update-dns.yml/badge.svg)](https://github.com/muxinxy/easytier-cf-records/actions/workflows/update-dns.yml)
 
+> 徽章在 workflow 首次运行之前显示 `no status`，手动触发或等定时跑过一次后就会显示通过/失败。
+
 合并手动节点与社区状态页节点，定期探测可用性和延迟，把延迟最低的前几名写入 DNS，供各 EasyTier 节点通过 `srv://` / `txt://` 自动发现公共中继。
 
 ## 运行方式
 
-跑在 **GitHub Actions**（公共仓库免费），每 30 分钟一次，不依赖任何常驻设备（NAS / 电脑关机都照常运行）。定时触发可能延迟几分钟到几十分钟，对小时级的 DNS 更新没有影响。
+跑在 **GitHub Actions**（公共仓库免费），不依赖任何常驻设备（NAS / 电脑关机都照常运行）。工作流固定每 15 分钟检查一次是否到期，**实际执行间隔由仓库变量 `UPDATE_INTERVAL_MINUTES` 控制**（默认 30 分钟），因为 GitHub 的 schedule cron 不支持引用变量。定时触发可能延迟几分钟到几十分钟，对小时级的 DNS 更新没有影响。
 
 其他方式的取舍：Cloudflare Worker 定时最精准但只能做 TCP 探测；Vercel/Netlify 免费版 cron 受限（Vercel Hobby 每天仅一次）且无原始 TCP/UDP 套接字；本机/服务器 cron 依赖常驻设备。本脚本零依赖（Node ≥ 18），将来若想在 VPS 上跑，直接 `cron` 调用即可。
 
@@ -37,7 +39,7 @@ Uptime Kuma 状态页 ─────┘        ↓
 | 记录 | 名称 | 内容 | 说明 |
 |---|---|---|---|
 | SRV ×N | `_easytier._tcp.et.<domain>` | priority 按延迟名次降序（第 1 名最高） | EasyTier 把 priority 当**加权随机权重，越大越常被选中**。SRV 只收 tcp/udp 节点（EasyTier 会按查询协议拼 `tcp://` 地址，wss 节点连不上） |
-| A（按需） | `et_<priority>.<domain>` | 节点裸 IP | SRV target 为裸 IP 时自动创建 |
+| A（按需） | `et_<priority>.<domain>` | 节点裸 IP | SRV 的 target 不能直接写裸 IP，为它自动创建的 A 记录；名称后缀就是该节点的 priority（随延迟名次变化，掉出名单的会自动清理） |
 | TXT 主记录 | `et.<domain>` | 全部入选节点，空格分隔 | EasyTier 每次解析随机选一、分摊流量（内容限 240 字节内，因 TXT 单字符串段 ≤255 字节） |
 | TXT 槽位 ×3 | `et-1` / `et-2` / `et-3` `.<domain>` | `tcp://host:port` 等 | 延迟前 3 名的确定性槽位，与 config.toml 的 `txt://et-N` 对应 |
 
@@ -62,8 +64,10 @@ uri = "txt://et-3.<domain>"
 ## 首次部署
 
 1. 在 Cloudflare 面板创建 API Token：权限 **Zone → DNS → Edit**，Zone 限定为 `<domain>`。
-2. GitHub 仓库 **Settings → Secrets and variables → Actions**，添加 Secret `CF_API_TOKEN`。（zone id 会用 token 自动查询，域名在 workflow 里通过 `CF_DOMAIN` 指定）
-3. **Actions → Update EasyTier DNS records → Run workflow** 手动触发一次，看运行摘要；之后每 30 分钟自动执行。
+2. GitHub 仓库 **Settings → Secrets and variables → Actions** 添加：
+   - **Secrets** 标签页：`CF_API_TOKEN`（zone id 会用 token 自动查询）
+   - **Variables** 标签页（可选）：`CF_DOMAIN`（zone 域名，默认 `<domain>`）、`UPDATE_INTERVAL_MINUTES`（实际执行间隔分钟数，默认 30）
+3. **Actions → Update EasyTier DNS records → Run workflow** 手动触发一次（可勾选 force 忽略间隔立即执行），看运行摘要；之后按配置的间隔自动执行。
 
 ## 本地运行
 

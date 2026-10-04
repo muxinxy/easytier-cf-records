@@ -1,12 +1,19 @@
 name: Update EasyTier DNS records
 
-# 每 30 分钟更新一次 Cloudflare 的 EasyTier 发现记录（SRV + TXT）。
-# 每次运行会把 last_run.json 提交回仓库：既是审计记录，也保持仓库活跃，
-# 避免 GitHub 在 60 天无活动后停用定时工作流。
+# GitHub 的 schedule.cron 不支持引用变量，只能写死。
+# 因此固定每 15 分钟"检查"一次，实际执行间隔由仓库变量 UPDATE_INTERVAL_MINUTES
+# 控制（Settings → Secrets and variables → Actions → Variables，默认 30），
+# 上次执行时间取自 last_run.json 的 ranAt，未到间隔的运行会直接跳过。
+# 域名由仓库变量 CF_DOMAIN 控制（默认见 update_records.mjs）。
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "*/15 * * * *"
   workflow_dispatch:
+    inputs:
+      force:
+        description: 忽略执行间隔，立即运行
+        type: boolean
+        default: false
 
 concurrency:
   group: update-dns
@@ -22,18 +29,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check whether update is due
+        id: due
+        env:
+          INTERVAL_MINUTES: ${{ vars.UPDATE_INTERVAL_MINUTES }}
+        run: |
+          case "$INTERVAL_MINUTES" in ''|*[!0-9]*) interval=30 ;; *) interval="$INTERVAL_MINUTES" ;; esac
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.force }}" = "true" ]; then
+            echo "due=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          last_ms=$(node -e "try{console.log(new Date(require('./last_run.json').ranAt).getTime())}catch{console.log(0)}")
+          now_ms=$(node -e "console.log(Date.now())")
+          echo "间隔 ${interval} 分钟，上次执行 $(date -u -d "@$((last_ms / 1000))" '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || echo 无记录)"
+          if [ $((now_ms - last_ms)) -ge $((interval * 60000)) ]; then
+            echo "due=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "due=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-node@v4
+        if: steps.due.outputs.due == 'true'
         with:
           node-version: 20
 
       - name: Probe nodes and update Cloudflare
+        if: steps.due.outputs.due == 'true'
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-          CF_DOMAIN: <domain>
+          CF_DOMAIN: ${{ vars.CF_DOMAIN }}
         run: node update_records.mjs
 
       - name: Commit run record
-        if: success()
+        if: steps.due.outputs.due == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
