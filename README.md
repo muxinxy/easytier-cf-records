@@ -40,6 +40,8 @@ Uptime Kuma 状态页 ─────┘        ↓
 |---|---|---|---|
 | SRV ×N | `_easytier._tcp.et.<domain>` | priority 按延迟名次降序（第 1 名最高） | EasyTier 把 priority 当**加权随机权重，越大越常被选中**。SRV 只收 tcp/udp 节点（EasyTier 会按查询协议拼 `tcp://` 地址，wss 节点连不上） |
 | A（按需） | `et_<priority>.<domain>` | 节点裸 IP | SRV 的 target 不能直接写裸 IP，为它自动创建的 A 记录；名称后缀就是该节点的 priority（随延迟名次变化，掉出名单的会自动清理） |
+
+> 换记录内容后，新值（TTL 60 秒）会很快生效；但如果**被替换掉的旧记录**是手工创建的长 TTL（如 1 小时），公网解析器最长会在此后一个 TTL 周期内仍看到旧值，属正常现象。
 | TXT 主记录 | `et.<domain>` | 全部入选节点，空格分隔 | EasyTier 每次解析随机选一、分摊流量（内容限 240 字节内，因 TXT 单字符串段 ≤255 字节） |
 | TXT 槽位 ×3 | `et-1` / `et-2` / `et-3` `.<domain>` | `tcp://host:port` 等 | 延迟前 3 名的确定性槽位，与 config.toml 的 `txt://et-N` 对应 |
 
