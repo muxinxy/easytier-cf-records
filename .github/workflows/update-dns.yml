@@ -1,0 +1,46 @@
+name: Update EasyTier DNS records
+
+# 每 30 分钟更新一次 Cloudflare 的 EasyTier 发现记录（SRV + TXT）。
+# 每次运行会把 last_run.json 提交回仓库：既是审计记录，也保持仓库活跃，
+# 避免 GitHub 在 60 天无活动后停用定时工作流。
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: update-dns
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Probe nodes and update Cloudflare
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_DOMAIN: <domain>
+        run: node update_records.mjs
+
+      - name: Commit run record
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add last_run.json
+          if git diff --cached --quiet; then
+            echo "last_run.json 无变化"
+          else
+            git commit -m "chore: dns update run $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+            git push
+          fi

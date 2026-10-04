@@ -1,0 +1,7 @@
+# ZCode 本地配置
+.zcode/
+
+# 旧脚本产生的 DNS 备份文件
+cf_dns_backup_*.json
+
+node_modules/
