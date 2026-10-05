@@ -11,7 +11,9 @@
 
 ## 运行方式
 
-跑在 **GitHub Actions**（公共仓库免费），不依赖任何常驻设备（NAS / 电脑关机都照常运行）。工作流固定每 5 分钟检查一次是否到期，**实际执行间隔由仓库变量 `UPDATE_INTERVAL_MINUTES` 控制**（默认 30 分钟，即 30~35 分钟一档），因为 GitHub 的 schedule cron 不支持引用变量；GitHub 定时触发本身还会有几分钟到几十分钟的固有延迟。
+跑在 **GitHub Actions**（公共仓库免费），不依赖任何常驻设备（NAS / 电脑关机都照常运行）。工作流固定每 5 分钟检查一次是否到期，**实际执行间隔由仓库变量 `UPDATE_INTERVAL_MINUTES` 控制**（默认 30 分钟），因为 GitHub 的 schedule cron 不支持引用变量。
+
+对更新频率要有合理预期：GitHub 定时触发本身不可靠——触发会被延迟几分钟到几十分钟，高峰期**甚至被直接丢弃**（实测出现过 2~3 小时才轮到一次的情况）。这些是平台限制。对"公共节点发现记录"这种场景，几小时的滞后通常可以接受；若要求准点，需要外置精确调度器（如 Cloudflare Worker Cron 通过 API 触发 workflow），代价是多维护一个组件。
 
 其他方式的取舍：Cloudflare Worker 定时最精准但只能做 TCP 探测；Vercel/Netlify 免费版 cron 受限（Vercel Hobby 每天仅一次）且无原始 TCP/UDP 套接字；本机/服务器 cron 依赖常驻设备。本脚本零依赖（Node ≥ 18），将来若想在 VPS 上跑，直接 `cron` 调用即可。
 
