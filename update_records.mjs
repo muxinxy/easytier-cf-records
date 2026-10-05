@@ -5,7 +5,7 @@
  * 流程：手动节点(peers.txt) + Uptime Kuma 状态页 → 合并去重 → TCP 探测(可用性+延迟)
  *      → 过滤排序 → 取前 N → diff 式更新 Cloudflare SRV/TXT 记录 → 输出 last_run.json
  *
- * 零依赖，Node >= 18（CI 用 Node 20）。本地手动运行：node update_records.mjs --dry-run
+ * 零依赖，Node >= 18（CI 用 Node 20）。本地手动运行：CF_DOMAIN=<你的域名> node update_records.mjs --dry-run
  *
  * EasyTier 消费端语义（来自 easytier-core/src/connectivity/manual/discovery/implementation.rs）：
  *  - srv://et.<domain>  查询 _easytier._tcp.et.<domain>（以及 _udp，查不到忽略），
@@ -42,7 +42,7 @@ function parseArgs(argv) {
     srvPriorityStep: 10,
     peersFile: "peers.txt",
     outFile: "last_run.json",
-    domain: process.env.CF_DOMAIN || "<domain>",
+    domain: process.env.CF_DOMAIN || null, // 必填，无默认值：未设置时直接报错退出
     srvName: "_easytier._tcp.et",
     txtPrefix: "et",
     kumaBase: process.env.KUMA_BASE || "https://ruixuan.online/uptime",
@@ -92,7 +92,7 @@ function parseArgs(argv) {
   --concurrency N      探测并发数，默认 20
   --ttl SECONDS        DNS 记录 TTL，默认 60
   --peers FILE         手动节点列表，默认 peers.txt
-  --domain NAME        Cloudflare zone 域名（或环境变量 CF_DOMAIN）
+  --domain NAME        Cloudflare zone 域名（或环境变量 CF_DOMAIN），必填，无默认值
   --srv-name NAME      SRV 记录名主体，默认 _easytier._tcp.et
   --txt-prefix NAME    TXT 记录名前缀，默认 et
   --kuma-base URL      Uptime Kuma 地址（或环境变量 KUMA_BASE）
@@ -595,8 +595,10 @@ ${rows.join("\n")}
 **Cloudflare 变更 ${changes.length} 项**
 ${changes.map((c) => `- \`${c.action}\` ${c.detail}`).join("\n") || "- 无（记录已是最新）"}
 `;
-  console.log(`\n${md}`);
-  if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+  const mask = (s) => String(s).split(opts.domain).join("<domain>");
+  const safeMd = mask(md);
+  console.log(`\n${safeMd}`);
+  if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, safeMd);
 }
 
 function writeLastRun(outFile, opts, selected, changes, allNodes, stats, dryRun) {
@@ -639,7 +641,9 @@ function writeLastRun(outFile, opts, selected, changes, allNodes, stats, dryRun)
       excluded: n.excluded ?? null,
     })),
   };
-  writeFileSync(outFile, JSON.stringify(payload, null, 2) + "\n");
+  // 提交进公共仓库的内容同样脱敏（Actions 日志由 console 补丁处理）
+  const json = JSON.stringify(payload, null, 2) + "\n";
+  writeFileSync(outFile, json.split(opts.domain).join("<domain>"));
   console.log(`[out] 运行结果已写入 ${outFile}`);
 }
 
@@ -647,6 +651,16 @@ function writeLastRun(outFile, opts, selected, changes, allNodes, stats, dryRun)
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
+  if (!opts.domain) {
+    throw new Error("未设置域名：请通过仓库变量/环境变量 CF_DOMAIN 或 --domain 参数指定（必填，无默认值）");
+  }
+  // 输出脱敏：所有日志（含 GitHub Actions 日志）与输出文件中不出现真实域名
+  const rawLog = console.log.bind(console);
+  const rawErr = console.error.bind(console);
+  const variants = [...new Set([opts.domain, opts.domain.toLowerCase(), opts.domain.toUpperCase()])];
+  const mask = (s) => variants.reduce((acc, d) => acc.split(d).join("<domain>"), String(s));
+  console.log = (...a) => rawLog(...a.map((x) => (typeof x === "string" ? mask(x) : x)));
+  console.error = (...a) => rawErr(...a.map((x) => (typeof x === "string" ? mask(x) : x)));
   console.log(`[run] rank-by=${opts.rankBy} max=${opts.max} txt-count=${opts.txtCount} min-uptime=${opts.minUptime} dry-run=${opts.dryRun}`);
 
   const manual = parsePeersFile(opts.peersFile);

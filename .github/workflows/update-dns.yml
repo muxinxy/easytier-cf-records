@@ -1,13 +1,15 @@
 name: Update EasyTier DNS records
 
 # GitHub 的 schedule.cron 不支持引用变量，只能写死。
-# 因此固定每 15 分钟"检查"一次，实际执行间隔由仓库变量 UPDATE_INTERVAL_MINUTES
+# 因此固定每 5 分钟"检查"一次，实际执行间隔由仓库变量 UPDATE_INTERVAL_MINUTES
 # 控制（Settings → Secrets and variables → Actions → Variables，默认 30），
 # 上次执行时间取自 last_run.json 的 ranAt，未到间隔的运行会直接跳过。
-# 域名由仓库变量 CF_DOMAIN 控制（默认见 update_records.mjs）。
+# 实际间隔 = UPDATE_INTERVAL_MINUTES ~ +5 分钟（检查点对齐），再叠加 GitHub
+# 定时触发固有的几分钟到几十分钟延迟（平台限制，无法消除）。
+# 域名由仓库变量 CF_DOMAIN 控制（必填，未设置时脚本会直接报错退出）。
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
     inputs:
       force:
