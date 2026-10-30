@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-10-30T17:09:56.576Z",
+  "ranAt": "2026-10-30T21:27:53.437Z",
   "dryRun": false,
   "rankBy": "auto",
   "stats": {
@@ -19,8 +19,8 @@
       "host": "156.229.161.115",
       "port": 11010,
       "proto": "tcp",
-      "score": 175.09183099999973,
-      "probeMs": 55.09183099999973,
+      "score": 160.90609600000005,
+      "probeMs": 40.90609600000005,
       "kumaPing": null,
       "uptime24": null,
       "sources": [
@@ -34,8 +34,8 @@
       "host": "47.103.35.100",
       "port": 11010,
       "proto": "tcp",
-      "score": 355.40994800000044,
-      "probeMs": 235.40994800000044,
+      "score": 333.909679,
+      "probeMs": 213.90967899999998,
       "kumaPing": null,
       "uptime24": null,
       "sources": [
@@ -49,8 +49,8 @@
       "host": "96.9.229.212",
       "port": 11010,
       "proto": "tcp",
-      "score": 364.18136100000083,
-      "probeMs": 244.18136100000083,
+      "score": 363.79542000000004,
+      "probeMs": 243.79542000000004,
       "kumaPing": null,
       "uptime24": null,
       "sources": [
@@ -64,8 +64,8 @@
       "host": "et.gbc.moe",
       "port": 11011,
       "proto": "tcp",
-      "score": 2153.483293999998,
-      "probeMs": 2033.4832939999978,
+      "score": 1502.5428620000002,
+      "probeMs": 1382.5428620000002,
       "kumaPing": null,
       "uptime24": null,
       "sources": [
@@ -75,76 +75,7 @@
       "txtRecord": null
     }
   ],
-  "changes": [
-    {
-      "action": "CREATE",
-      "detail": "SRV _easytier._tcp.et.<domain> prio=40 et_40.<domain>:11010"
-    },
-    {
-      "action": "CREATE",
-      "detail": "SRV _easytier._tcp.et.<domain> prio=30 et_30.<domain>:11010"
-    },
-    {
-      "action": "CREATE",
-      "detail": "SRV _easytier._tcp.et.<domain> prio=20 et_20.<domain>:11010"
-    },
-    {
-      "action": "CREATE",
-      "detail": "SRV _easytier._tcp.et.<domain> prio=10 et.gbc.moe:11011"
-    },
-    {
-      "action": "DELETE",
-      "detail": "SRV _easytier._tcp.et.<domain> easytier.weiai.org.cn:11010"
-    },
-    {
-      "action": "DELETE",
-      "detail": "SRV _easytier._tcp.et.<domain> et.sumnight.top:11010"
-    },
-    {
-      "action": "DELETE",
-      "detail": "SRV _easytier._tcp.et.<domain> 225284.xyz:11010"
-    },
-    {
-      "action": "DELETE",
-      "detail": "SRV _easytier._tcp.et.<domain> et_10.<domain>:11010"
-    },
-    {
-      "action": "DELETE",
-      "detail": "SRV _easytier._tcp.et.<domain> et.basd1.de:11010"
-    },
-    {
-      "action": "CREATE",
-      "detail": "A et_40.<domain> -> 156.229.161.115"
-    },
-    {
-      "action": "CREATE",
-      "detail": "A et_30.<domain> -> 47.103.35.100"
-    },
-    {
-      "action": "CREATE",
-      "detail": "A et_20.<domain> -> 96.9.229.212"
-    },
-    {
-      "action": "DELETE",
-      "detail": "A et_10.<domain>"
-    },
-    {
-      "action": "UPDATE",
-      "detail": "TXT et.<domain> -> \"tcp://156.229.161.115:11010 tcp://47.103.35.100:11010 tcp://96.9.229.212:11010 tcp://et.gbc.moe:11011\""
-    },
-    {
-      "action": "UPDATE",
-      "detail": "TXT et-1.<domain> -> \"tcp://156.229.161.115:11010\""
-    },
-    {
-      "action": "UPDATE",
-      "detail": "TXT et-2.<domain> -> \"tcp://47.103.35.100:11010\""
-    },
-    {
-      "action": "UPDATE",
-      "detail": "TXT et-3.<domain> -> \"tcp://96.9.229.212:11010\""
-    }
-  ],
+  "changes": [],
   "nodes": [
     {
       "host": "public.easytier.top",
@@ -230,7 +161,7 @@
       "sources": [
         "manual"
       ],
-      "probeMs": 244.18136100000083,
+      "probeMs": 243.79542000000004,
       "kumaId": null,
       "kumaName": null,
       "uptime24": null,
@@ -440,7 +371,7 @@
       "sources": [
         "manual"
       ],
-      "probeMs": 55.09183099999973,
+      "probeMs": 40.90609600000005,
       "kumaId": null,
       "kumaName": null,
       "uptime24": null,
@@ -455,7 +386,7 @@
       "sources": [
         "manual"
       ],
-      "probeMs": 235.40994800000044,
+      "probeMs": 213.90967899999998,
       "kumaId": null,
       "kumaName": null,
       "uptime24": null,
@@ -470,7 +401,7 @@
       "sources": [
         "manual"
       ],
-      "probeMs": 2033.4832939999978,
+      "probeMs": 1382.5428620000002,
       "kumaId": null,
       "kumaName": null,
       "uptime24": null,
