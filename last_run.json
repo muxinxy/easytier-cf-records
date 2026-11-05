@@ -1,5 +1,5 @@
 {
-  "ranAt": "2026-11-05T02:49:22.313Z",
+  "ranAt": "2026-11-05T09:54:29.290Z",
   "dryRun": false,
   "rankBy": "auto",
   "stats": {
@@ -20,9 +20,9 @@
       "port": 11010,
       "proto": "tcp",
       "score": 1,
-      "probeMs": 269.68113900000026,
+      "probeMs": 1180.0021450000004,
       "kumaPing": 1,
-      "uptime24": 0.9986110414223707,
+      "uptime24": 0.99861099756358,
       "sources": [
         "kuma"
       ],
@@ -35,9 +35,9 @@
       "port": 11010,
       "proto": "tcp",
       "score": 7,
-      "probeMs": 506.12101299999995,
+      "probeMs": 210.5006319999993,
       "kumaPing": 7,
-      "uptime24": 0.9978006157217225,
+      "uptime24": 0.9978006822192473,
       "sources": [
         "kuma"
       ],
@@ -50,9 +50,9 @@
       "port": 11010,
       "proto": "tcp",
       "score": 20,
-      "probeMs": 246.36000499999955,
+      "probeMs": 223.46823799999947,
       "kumaPing": 20,
-      "uptime24": 0.9986107282731304,
+      "uptime24": 0.9986107505656564,
       "sources": [
         "kuma"
       ],
@@ -64,10 +64,10 @@
       "host": "et.basd1.de",
       "port": 11010,
       "proto": "udp",
-      "score": 24,
-      "probeMs": 360.0956640000004,
-      "kumaPing": 24,
-      "uptime24": 0.9412474238262792,
+      "score": 23,
+      "probeMs": 370.4282379999995,
+      "kumaPing": 23,
+      "uptime24": 0.9506745664121512,
       "sources": [
         "kuma"
       ],
@@ -79,10 +79,10 @@
       "host": "183.230.36.171",
       "port": 11010,
       "proto": "tcp",
-      "score": 34,
-      "probeMs": 259.3737350000001,
-      "kumaPing": 34,
-      "uptime24": 0.9982053592158697,
+      "score": 36,
+      "probeMs": 215.7891470000004,
+      "kumaPing": 36,
+      "uptime24": 0.9982053087634111,
       "sources": [
         "kuma"
       ],
@@ -161,7 +161,7 @@
       "sources": [
         "manual"
       ],
-      "probeMs": 243.44018700000015,
+      "probeMs": 199.9419600000001,
       "kumaId": null,
       "kumaName": null,
       "uptime24": null,
@@ -176,7 +176,7 @@
       "sources": [
         "manual"
       ],
-      "probeMs": 236.8136239999999,
+      "probeMs": 189.74899900000014,
       "kumaId": null,
       "kumaName": null,
       "uptime24": null,
@@ -386,7 +386,7 @@
       "sources": [
         "manual"
       ],
-      "probeMs": 55.72774100000004,
+      "probeMs": 9.369926000000078,
       "kumaId": null,
       "kumaName": null,
       "uptime24": null,
@@ -401,7 +401,7 @@
       "sources": [
         "manual"
       ],
-      "probeMs": 235.19014600000014,
+      "probeMs": 196.398457,
       "kumaId": null,
       "kumaName": null,
       "uptime24": null,
@@ -416,7 +416,7 @@
       "sources": [
         "manual"
       ],
-      "probeMs": 1408.363833,
+      "probeMs": 1960.610713,
       "kumaId": null,
       "kumaName": null,
       "uptime24": null,
@@ -476,10 +476,10 @@
       "sources": [
         "kuma"
       ],
-      "probeMs": 269.68113900000026,
+      "probeMs": 1180.0021450000004,
       "kumaId": 1,
       "kumaName": "[我的]tcp://225284.xyz:11010（海波：上海电信 / 可中转）",
-      "uptime24": 0.9986110414223707,
+      "uptime24": 0.99861099756358,
       "excluded": null
     },
     {
@@ -491,10 +491,10 @@
       "sources": [
         "kuma"
       ],
-      "probeMs": 246.36000499999955,
+      "probeMs": 223.46823799999947,
       "kumaId": 11,
       "kumaName": "tcp://easytier.weiai.org.cn:11010（为爱，唯爱：厦门电信 / 可中转）",
-      "uptime24": 0.9986107282731304,
+      "uptime24": 0.9986107505656564,
       "excluded": null
     },
     {
@@ -506,10 +506,10 @@
       "sources": [
         "kuma"
       ],
-      "probeMs": 115.6850289999993,
+      "probeMs": 169.84731199999987,
       "kumaId": 48,
       "kumaName": "wss://et.chinokou.cn（ChinoKou：edgeone / 可中转）",
-      "uptime24": 0.9454174330837891,
+      "uptime24": 0.9454154145973167,
       "excluded": null
     },
     {
@@ -521,10 +521,10 @@
       "sources": [
         "kuma"
       ],
-      "probeMs": 360.0956640000004,
+      "probeMs": 370.4282379999995,
       "kumaId": 53,
       "kumaName": "udp://et.basd1.de:11010（宇智波.希：枣庄BGP / 可中转）",
-      "uptime24": 0.9412474238262792,
+      "uptime24": 0.9506745664121512,
       "excluded": null
     },
     {
@@ -536,10 +536,10 @@
       "sources": [
         "kuma"
       ],
-      "probeMs": 259.3737350000001,
+      "probeMs": 215.7891470000004,
       "kumaId": 47,
       "kumaName": "tcp://183.230.36.171:11010（Just the Two of Us：重庆移动跨网专线 / 可中转）",
-      "uptime24": 0.9982053592158697,
+      "uptime24": 0.9982053087634111,
       "excluded": null
     },
     {
@@ -551,10 +551,10 @@
       "sources": [
         "kuma"
       ],
-      "probeMs": 506.12101299999995,
+      "probeMs": 210.5006319999993,
       "kumaId": 17,
       "kumaName": "tcp://et.sumnight.top:11010（夏夜：上海bgp / 中转限速500kb）",
-      "uptime24": 0.9978006157217225,
+      "uptime24": 0.9978006822192473,
       "excluded": null
     },
     {
@@ -566,10 +566,10 @@
       "sources": [
         "kuma"
       ],
-      "probeMs": 285.0592779999997,
+      "probeMs": 230.6457279999995,
       "kumaId": 46,
       "kumaName": "udp://us01.225284.xyz:11010（海波：云南电信 / 可中转）[我的]",
-      "uptime24": 0.9986104647354694,
+      "uptime24": 0.9986104434805733,
       "excluded": null
     },
     {
@@ -581,7 +581,7 @@
       "sources": [
         "kuma"
       ],
-      "probeMs": 5.348516000000018,
+      "probeMs": 10.01025000000027,
       "kumaId": 51,
       "kumaName": "[海外]wss://et.南梁.com（林然：CF / 可中转）",
       "uptime24": 1,
